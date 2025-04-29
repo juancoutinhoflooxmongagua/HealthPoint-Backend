@@ -37,4 +37,43 @@ router.post('/register', async (req, res) => {
   }
 })
 
+router.post('/login', async (req, res) => {
+    try {
+      const { user_email, user_password } = req.body;
+  
+      if (!user_email || !user_password) {
+        return res.status(400).json({ error: 'Dados incompletos' });
+      }
+  
+      const [rows] = await db.execute("SELECT * FROM users WHERE user_email = ?", [user_email]);
+  
+      if (rows.length === 0) {
+        return res.status(400).json({ error: 'Usuário não encontrado' });
+      }
+  
+      const user = rows[0];
+  
+      const match = await bcrypt.compare(user_password, user.user_password);
+  
+      if (!match) {
+        return res.status(400).json({ error: 'Senha incorreta' });
+      }
+  
+      const token = jwt.sign(
+        { user_id: user.user_id, user_email },
+        process.env.JWT_SECRET
+      );
+  
+      res.status(200).json({
+        message: 'Login realizado com sucesso',
+        user_id: user.user_id,
+        token
+      });
+  
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Erro no login' });
+    }
+  });
+
 module.exports = router
