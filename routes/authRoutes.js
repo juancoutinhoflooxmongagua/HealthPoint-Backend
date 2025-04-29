@@ -5,7 +5,7 @@ const db = require('../config/db')
 
 const router = express.Router()
 
-router.post("/register", async (req, res) => {
+router.post('/register', async (req, res) => {
   try {
     const { user_email, user_name, user_password, user_phone } = req.body
 

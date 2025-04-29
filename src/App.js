@@ -8,7 +8,7 @@ const authRoutes = require('../routes/authRoutes')
 
 app.use(express.json())
 
-app.use('/users', userRoutes)
-app.use('/register', authRoutes)
+app.use('/', userRoutes)
+app.use('/', authRoutes)
 
 module.exports = app
