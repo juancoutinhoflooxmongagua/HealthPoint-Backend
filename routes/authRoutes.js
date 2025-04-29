@@ -20,9 +20,16 @@ router.post('/register', async (req, res) => {
       [user_email, hashedPassword, user_name, user_phone]
     )
 
+    const token = jwt.sign(
+        { user_id: result.insertId, user_email },
+        process.env.JWT_SECRET,
+        { expiresIn: '1d' }
+    )
+      
     res.status(201).json({
       message: 'Usuário registrado com sucesso',
-      user_id: result.insertId
+      user_id: result.insertId,
+      token
     })
   } catch (error) {
     console.error(error)
