@@ -12,5 +12,30 @@ router.get('/users', async (req, res) => {
     }
 })
 
+router.get('/profile', async (req, res) => {
+    const token = req.headers.authorization?.split(' ')[1];
+    
+    if (!token) {
+      return res.status(401).json({ error: 'Token não fornecido' });
+    }
+  
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const { user_id } = decoded;
+  
+      const [rows] = await db.execute("SELECT user_name, user_email, user_phone FROM users WHERE user_id = ?", [user_id]);
+      
+      if (rows.length === 0) {
+        return res.status(404).json({ error: 'Usuário não encontrado' });
+      }
+      
+      res.status(200).json(rows[0]); 
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Erro ao obter dados do usuário' });
+    }
+  });
+  
+
 module.exports = router
 

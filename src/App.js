@@ -5,6 +5,8 @@ const express = require('express')
 const app = express()
 const userRoutes = require('../routes/userRoutes')
 const authRoutes = require('../routes/authRoutes')
+const userProfile = require('../routes/userProfile')
+
 const cors = require('cors')
 
 app.use(cors({
@@ -15,5 +17,6 @@ app.use(express.json())
 
 app.use('/', userRoutes)
 app.use('/auth', authRoutes)
+app.use('/', userProfile)
 
 module.exports = app
