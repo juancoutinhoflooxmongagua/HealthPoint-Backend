@@ -24,7 +24,7 @@ router.get('/profile', async (req, res) => {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       const { user_id } = decoded;
   
-      const [rows] = await db.execute("SELECT user_name, user_email, user_phone FROM users WHERE user_id = ?", [user_id]);
+      const [rows] = await db.execute("SELECT user_name, user_email, user_phone, user_role FROM users WHERE user_id = ?", [user_id]);
       
       if (rows.length === 0) {
         return res.status(404).json({ error: 'Usuário não encontrado' });
