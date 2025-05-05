@@ -1,23 +1,20 @@
-// app.js
-require('dotenv').config()
+require('dotenv').config();
 
-const express = require('express')
-const app = express()
-const cors = require('cors')
+const express = require('express');
+const app = express();
+const cors = require('cors');
 
-app.use(express.json())
+app.use(express.json());
+app.use(cors({ origin: 'http://localhost:3000' }));
 
-app.use(cors({
-    origin: 'http://localhost:3000'
-}));
+const userRoutes = require('../routes/userRoutes');
+const authRoutes = require('../routes/authRoutes');
+const jobRoutes = require('../routes/jobRouter');
+const hospitalRoutes = require('../routes/hospitalRoutes');
 
-// Routes
-const userRoutes = require('../routes/userRoutes')
-const authRoutes = require('../routes/authRoutes')
-const jobRoutes = require('../routes/jobRouter')
+app.use('/', userRoutes);
+app.use('/jobs', jobRoutes);
+app.use('/auth', authRoutes);
+app.use('/hospital', hospitalRoutes);
 
-app.use('/', userRoutes)
-app.use('/jobs', jobRoutes)
-app.use('/auth', authRoutes)
-
-module.exports = app
+module.exports = app;

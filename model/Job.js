@@ -1,61 +1,48 @@
-const db = require('../config/db');
+const pool = require('../config/db'); // Importando a pool de conexões
 
 module.exports = {
-  create(data) {
-    const {
-      creator_id,
-      hospital_name,
-      hospital_id,
-      job_type,
-      job_title,
-      job_description,
-      job_points
-    } = data;
+  // Criar um novo job
+  async create(data) {
+    const { creator_id, hospital_name, hospital_id, job_type, job_title, job_description, job_points } = data;
 
-    return new Promise((resolve, reject) => {
-      db.query(
+    try {
+      const [result] = await pool.execute(
         `INSERT INTO jobs 
         (creator_id, hospital_name, hospital_id, job_type, job_title, job_description, job_points)
         VALUES (?, ?, ?, ?, ?, ?, ?)`,
-        [creator_id, hospital_name, hospital_id, job_type, job_title, job_description, job_points],
-        (err, result) => {
-          if (err) return reject(err);
-          resolve({ job_id: result.insertId, ...data });
-        }
+        [creator_id, hospital_name, hospital_id, job_type, job_title, job_description, job_points]
       );
-    });
+      return { job_id: result.insertId, ...data };
+    } catch (err) {
+      throw new Error('Erro ao criar vaga');
+    }
   },
 
-  list() {
-    return new Promise((resolve, reject) => {
-      db.query('SELECT * FROM jobs', (err, results) => {
-        if (err) return reject(err);
-        resolve(results);
-      });
-    });
+  // Listar todos os jobs
+  async list() {
+    try {
+      const [results] = await pool.execute('SELECT * FROM jobs');
+      return results;
+    } catch (err) {
+      throw new Error('Erro ao listar vagas');
+    }
   },
 
-  remove(id) {
-    return new Promise((resolve, reject) => {
-      db.query('DELETE FROM jobs WHERE job_id = ?', [id], (err) => {
-        if (err) return reject(err);
-        resolve();
-      });
-    });
+  // Remover um job
+  async remove(id) {
+    try {
+      await pool.execute('DELETE FROM jobs WHERE job_id = ?', [id]);
+    } catch (err) {
+      throw new Error('Erro ao remover vaga');
+    }
   },
 
-  update(id, data) {
-    const {
-      hospital_name,
-      hospital_id,
-      job_type,
-      job_title,
-      job_description,
-      job_points
-    } = data;
+  // Atualizar um job
+  async update(id, data) {
+    const { hospital_name, hospital_id, job_type, job_title, job_description, job_points } = data;
 
-    return new Promise((resolve, reject) => {
-      db.query(
+    try {
+      await pool.execute(
         `UPDATE jobs SET 
           hospital_name = ?, 
           hospital_id = ?, 
@@ -64,12 +51,10 @@ module.exports = {
           job_description = ?, 
           job_points = ?
         WHERE job_id = ?`,
-        [hospital_name, hospital_id, job_type, job_title, job_description, job_points, id],
-        (err) => {
-          if (err) return reject(err);
-          resolve();
-        }
+        [hospital_name, hospital_id, job_type, job_title, job_description, job_points, id]
       );
-    });
+    } catch (err) {
+      throw new Error('Erro ao atualizar vaga');
+    }
   }
 };

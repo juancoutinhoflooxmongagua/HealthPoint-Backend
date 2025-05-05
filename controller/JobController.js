@@ -6,7 +6,7 @@ module.exports = {
       const job = await jobModel.create(req.body);
       res.status(201).json(job);
     } catch (err) {
-      res.status(500).json({ error: 'Erro ao criar vaga', details: err });
+      res.status(500).json({ error: 'Erro ao criar vaga', details: err.message });
     }
   },
 
