@@ -2,27 +2,12 @@ const express = require('express');
 const jwt = require('jsonwebtoken');
 const db = require('../config/db');
 const { verifyToken, isAdmin } = require('../middlewares/auth');
-
 const router = express.Router();
+const JobController = require('../controller/JobController');
 
-// CREATE
-router.post('/', verifyToken, (req, res) => {
-})
+router.post('/', verifyToken, JobController.create);
+router.get('/', verifyToken, JobController.list);
+router.delete('/:id', verifyToken, JobController.remove);
+router.put('/:id', verifyToken, JobController.update);
 
-//READ
-router.get('/', verifyToken, (req, res) => {
-
-})
-
-// DELETE 
-
-router.delete('/:id', verifyToken, (req, res) => {
-
-})
-
-// UPDATE
-router.put('/:id', verifyToken, (req, res) => {
-
-})
-
-module.exports = router;
+module.exports = router
