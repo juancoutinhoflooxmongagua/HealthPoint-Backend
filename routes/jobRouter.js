@@ -3,10 +3,9 @@ const { verifyToken } = require('../middlewares/auth');
 const router = express.Router();
 const JobController = require('../controller/JobController');
 
-// Rotas de criação, listagem, remoção e atualização de jobs
-router.post('/', verifyToken, JobController.create); // Criar job
-router.get('/', verifyToken, JobController.list); // Listar jobs
-router.delete('/:id', verifyToken, JobController.remove); // Remover job
-router.put('/:id', verifyToken, JobController.update); // Atualizar job
+router.post('/', verifyToken, JobController.create); 
+router.get('/', verifyToken, JobController.list); 
+router.delete('/:id', verifyToken, JobController.remove); 
+router.put('/:id', verifyToken, JobController.update); 
 
 module.exports = router;

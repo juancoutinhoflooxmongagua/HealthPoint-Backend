@@ -7,7 +7,7 @@ const router = express.Router();
 
 router.get('/users', verifyToken, isAdmin, async (req, res) => {
   try {
-    const [rows] = await db.query('SELECT * FROM users');
+    const [rows] = await db.query('SELECT * FROM Users');
     res.json(rows);
   } catch (error) {
     console.error(error);
@@ -20,7 +20,7 @@ router.get('/profile', verifyToken, async (req, res) => {
     const { user_id } = req.user;
 
     const [rows] = await db.execute(
-      "SELECT user_name, user_email, user_phone, user_role FROM users WHERE user_id = ?",
+      "SELECT user_name, user_email, user_phone, user_role FROM Users WHERE user_id = ?",
       [user_id]
     );
 

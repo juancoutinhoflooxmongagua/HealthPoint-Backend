@@ -16,8 +16,8 @@ router.post('/register', async (req, res) => {
     const hashedPassword = await bcrypt.hash(user_password, 10);
 
     const [result] = await db.execute(
-      "INSERT INTO users (user_email, user_password, user_name, user_phone, user_role) VALUES (?, ?, ?, ?, ?)",
-      [user_email, hashedPassword, user_name, user_phone, 'volunteer'] // padrão
+      "INSERT INTO Users (user_email, user_password, user_name, user_phone, user_role) VALUES (?, ?, ?, ?, ?)",
+      [user_email, hashedPassword, user_name, user_phone, 'volunteer'] 
     );
 
     const token = jwt.sign(
@@ -45,7 +45,7 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ error: 'Dados incompletos' });
     }
 
-    const [rows] = await db.execute("SELECT * FROM users WHERE user_email = ?", [user_email]);
+    const [rows] = await db.execute("SELECT * FROM Users WHERE user_email = ?", [user_email]);
 
     if (rows.length === 0) {
       return res.status(400).json({ error: 'Usuário não encontrado' });
