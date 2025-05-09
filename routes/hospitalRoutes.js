@@ -1,6 +1,5 @@
 const express = require('express');
 const db = require('../config/db');
-const { verifyToken } = require('../middlewares/auth');
 
 const router = express.Router();
 
@@ -14,7 +13,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-router.get('/:id', verifyToken, async (req, res) => {
+router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
 
