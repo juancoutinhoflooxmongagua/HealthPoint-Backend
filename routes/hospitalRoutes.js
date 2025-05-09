@@ -5,7 +5,7 @@ const router = express.Router();
 
 router.get('/', async (req, res) => {
   try {
-    const [rows] = await db.query('SELECT * FROM hospitals');
+    const [rows] = await db.query('SELECT * FROM Hospitals');
     res.json(rows);
   } catch (error) {
     console.error(error);
@@ -18,7 +18,7 @@ router.get('/:id', async (req, res) => {
     const { id } = req.params;
 
     const [rows] = await db.execute(
-      "SELECT hospital_name, hospital_address, hospital_phone FROM hospitals WHERE hospital_id = ?",
+      "SELECT hospital_name, hospital_address, hospital_phone FROM Hospitals WHERE hospital_id = ?",
       [id]
     );
 
