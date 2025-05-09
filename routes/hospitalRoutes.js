@@ -4,8 +4,7 @@ const { verifyToken } = require('../middlewares/auth');
 
 const router = express.Router();
 
-// Listar hospitais
-router.get('/', verifyToken, async (req, res) => {
+router.get('/', async (req, res) => {
   try {
     const [rows] = await db.query('SELECT * FROM hospitals');
     res.json(rows);
@@ -15,7 +14,6 @@ router.get('/', verifyToken, async (req, res) => {
   }
 });
 
-// Detalhes de um hospital específico
 router.get('/:id', verifyToken, async (req, res) => {
   try {
     const { id } = req.params;
