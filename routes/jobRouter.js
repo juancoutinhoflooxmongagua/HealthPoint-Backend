@@ -4,7 +4,7 @@ const router = express.Router();
 const JobController = require('../controller/JobController');
 
 router.post('/', verifyToken, JobController.create); 
-router.get('/', verifyToken, JobController.list); 
+router.get('/', JobController.list); 
 router.delete('/:id', verifyToken, JobController.remove); 
 router.put('/:id', verifyToken, JobController.update); 
 

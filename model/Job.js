@@ -1,4 +1,4 @@
-const pool = require('../config/db'); // Importando a pool de conexões
+const pool = require('../config/db'); 
 
 module.exports = {
   // Criar um novo job
