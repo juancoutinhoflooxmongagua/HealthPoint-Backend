@@ -1,10 +1,11 @@
 const pool = require('../config/db'); 
 
 module.exports = {
-  // Criar um novo job
-  async create(data) {
+  
+    async create(data) {
     const { creator_id, hospital_name, hospital_id, job_type, job_title, job_description, job_points } = data;
 
+    console.log('Dados recebidos para criação:', data); 
     try {
       const [result] = await pool.execute(
         `INSERT INTO jobs 
@@ -14,9 +15,11 @@ module.exports = {
       );
       return { job_id: result.insertId, ...data };
     } catch (err) {
-      throw new Error('Erro ao criar vaga');
+      console.error('Erro no INSERT do job:', err); 
+      throw err; 
     }
   },
+
 
   // Listar todos os jobs
   async list() {
