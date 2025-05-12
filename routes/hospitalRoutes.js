@@ -13,6 +13,47 @@ router.get('/', async (req, res) => {
   }
 });
 
+router.post('/login', async (req, res) => {
+  try {
+    const { hospital_email, hospital_password } = req.body;
+
+    if (!hospital_email || !hospital_password) {
+      return res.status(400).json({ error: 'Dados incompletos' });
+    }
+
+    const [rows] = await db.execute("SELECT * FROM Hospitals WHERE hospital_email = ?", [hospital_email]);
+
+    if (rows.length === 0) {
+      return res.status(400).json({ error: 'Hospital não encontrado' });
+    }
+
+    const hospital = rows[0];
+    const match = await bcrypt.compare(hospital_password, hospital.hospital_password);
+
+    if (!match) {
+      return res.status(400).json({ error: 'Senha incorreta' });
+    }
+
+    const token = jwt.sign(
+      {
+        hospital_id: hospital.hospital_id,
+        hospital_email: hospital.hospital_email
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: '1d' }
+    );
+
+    res.status(200).json({
+      message: 'Login realizado com sucesso',
+      hospital_id: hospital.hospital_id,
+      token
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Erro no login' });
+  }
+});
+
 router.post('/', async (req, res) => {
   try {
     const { hospital_name, hospital_address, hospital_phone } = req.body;
