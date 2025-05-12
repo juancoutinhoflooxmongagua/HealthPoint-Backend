@@ -17,15 +17,15 @@ router.get('/', async (req, res) => {
 
 router.post('/', async (req, res) => {
   try {
-    const { hospital_name, hospital_address, hospital_phone } = req.body;
+    const { hospital_name, hospital_address, hospital_phone, hospital_password } = req.body;
 
-    if (!hospital_name || !hospital_address || !hospital_phone) {
+    if (!hospital_name || !hospital_address || !hospital_phone || !hospital_password) {
       return res.status(400).json({ error: 'Todos os campos são obrigatórios' });
     }
 
     const [result] = await db.execute(
-      'INSERT INTO Hospitals (hospital_name, hospital_address, hospital_phone) VALUES (?, ?, ?)',
-      [hospital_name, hospital_address, hospital_phone]
+      'INSERT INTO Hospitals (hospital_name, hospital_address, hospital_phone, hospital_password) VALUES (?, ?, ?, ?)',
+      [hospital_name, hospital_address, hospital_phone, hospital_password]
     );
 
     res.status(201).json({ message: 'Hospital cadastrado', hospital_id: result.insertId });
@@ -34,34 +34,6 @@ router.post('/', async (req, res) => {
     res.status(500).json({ error: 'Erro ao cadastrar hospital' });
   }
 });
-router.get('/profile', verifyToken, async (req, res) => {
-  try {
-    console.log('>>> perfil solicitado para ID:', req.hospital);
-    const { hospital_id } = req.hospital;
-    if (!hospital_id) {
-      console.error('hospital_id indefinido em req.hospital');
-      return res.status(400).json({ error: 'ID do hospital inválido no token' });
-    }
-
-    const [rows] = await db.execute(
-      `SELECT 
-         hospital_name, hospital_id, hospital_address, hospital_phone 
-       FROM Hospitals 
-       WHERE hospital_id = ?`,
-      [hospital_id]
-    );
-
-    if (rows.length === 0) {
-      return res.status(404).json({ error: 'Hospital não encontrado' });
-    }
-
-    res.json(rows[0]);
-  } catch (err) {
-    console.error('Erro interno em GET /hospital/profile:', err.stack || err);
-    res.status(500).json({ error: 'Erro interno ao obter perfil do hospital' });
-  }
-});
-
 
 router.post('/login', async (req, res) => {
   try {
@@ -87,7 +59,7 @@ router.post('/login', async (req, res) => {
     }
 
     const token = jwt.sign(
-      { hospital_id: hospital.hospital_id, hospital_name: hospital.hospital_name },
+      { hospital_id: hospital.hospital_id },
       process.env.JWT_SECRET,
       { expiresIn: '1h' }
     );
@@ -96,6 +68,31 @@ router.post('/login', async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Erro ao fazer login' });
+  }
+});
+
+router.get('/profile', verifyToken, async (req, res) => {
+  try {
+    const hospital_id = req.hospital_id;
+
+    if (!hospital_id) {
+      console.error('hospital_id indefinido em req.hospital_id');
+      return res.status(400).json({ error: 'ID do hospital inválido no token' });
+    }
+
+    const [rows] = await db.execute(
+      `SELECT hospital_name, hospital_id, hospital_address, hospital_phone FROM Hospitals WHERE hospital_id = ?`,
+      [hospital_id]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Hospital não encontrado' });
+    }
+
+    res.json(rows[0]);
+  } catch (err) {
+    console.error('Erro interno em GET /hospital/profile:', err.stack || err);
+    res.status(500).json({ error: 'Erro interno ao obter perfil do hospital' });
   }
 });
 
