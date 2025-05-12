@@ -78,10 +78,15 @@ router.get('/:id', async (req, res) => {
 router.post('/login', async (req, res) => {
   try {
     const { hospital_id, hospital_password } = req.body;
+    
+    console.log('Tentando realizar login com dados:', req.body);
 
     if (!hospital_id || !hospital_password) {
+      console.warn('ID e senha do hospital são obrigatórios');
       return res.status(400).json({ error: 'ID e senha do hospital são obrigatórios' });
     }
+
+    console.log(`Buscando hospital com ID ${hospital_id} no banco...`);
 
     const [rows] = await db.execute(
       "SELECT * FROM Hospitals WHERE hospital_id = ?",
@@ -89,27 +94,35 @@ router.post('/login', async (req, res) => {
     );
 
     if (rows.length === 0) {
+      console.warn(`Hospital com ID ${hospital_id} não encontrado`);
       return res.status(404).json({ error: 'Hospital não encontrado' });
     }
 
     const hospital = rows[0];
+    console.log('Hospital encontrado:', hospital);
+
+    console.log('Verificando senha...');
 
     const isPasswordValid = await bcrypt.compare(hospital_password, hospital.hospital_password);
-    
+    console.log('Senha válida:', isPasswordValid);
+
     if (!isPasswordValid) {
+      console.warn('Senha incorreta');
       return res.status(401).json({ error: 'Senha incorreta' });
     }
 
+    console.log('Gerando token de autenticação...');
+
     const token = jwt.sign(
-    { hospital_id: hospital.hospital_id, hospital_name: hospital.hospital_name },
+      { hospital_id: hospital.hospital_id, hospital_name: hospital.hospital_name },
       process.env.JWT_SECRET,
-    { expiresIn: '1h' }
+      { expiresIn: '1h' }
     );
 
-
+    console.log('Token gerado com sucesso');
     res.status(200).json({ message: 'Login bem-sucedido', token });
   } catch (error) {
-    console.error(error);
+    console.error('Erro ao fazer login:', error);
     res.status(500).json({ error: 'Erro ao fazer login' });
   }
 });
