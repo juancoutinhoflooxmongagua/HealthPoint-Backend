@@ -101,10 +101,11 @@ router.post('/login', async (req, res) => {
     }
 
     const token = jwt.sign(
-      { hospital_id: hospital.hospital_id, hospital_name: hospital.hospital_name },
-      'seu-segredo-aqui',
-      { expiresIn: '1h' }
+    { hospital_id: hospital.hospital_id, hospital_name: hospital.hospital_name },
+      process.env.JWT_SECRET,
+    { expiresIn: '1h' }
     );
+
 
     res.status(200).json({ message: 'Login bem-sucedido', token });
   } catch (error) {
