@@ -17,9 +17,9 @@ router.get('/', async (req, res) => {
 
 router.post('/login', async (req, res) => {
   try {
-    const { hospital_email, hospital_password } = req.body;
+    const { hospital_id, hospital_password } = req.body;
 
-    if (!hospital_email || !hospital_password) {
+    if (!hospital_id || !hospital_password) {
       return res.status(400).json({ error: 'Dados incompletos' });
     }
 
