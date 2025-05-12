@@ -1,6 +1,7 @@
 const express = require('express');
 const db = require('../config/db');
-const { verify } = require('jsonwebtoken');
+const jwt = require('jsonwebtoken');
+const { verifyToken } = require('../middlewares/auth');
 
 const router = express.Router();
 
