@@ -1,7 +1,7 @@
 const express = require('express');
-const db = require('../config/db');
 const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
+const db = require('../config/db');
+const { verifyToken } = require('../middlewares/auth');
 
 const router = express.Router();
 
@@ -35,9 +35,9 @@ router.post('/', async (req, res) => {
   }
 });
 
-router.get('/profile/:hospital_id', async (req, res) => {
+router.get('/profile', verifyToken, async (req, res) => {
   try {
-    const { hospital_id } = req.params;
+    const { hospital_id } = req.hospital;
 
     const [rows] = await db.execute(
       "SELECT hospital_name, hospital_id, hospital_address, hospital_phone FROM Hospitals WHERE hospital_id = ?",
@@ -52,26 +52,6 @@ router.get('/profile/:hospital_id', async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Erro ao obter perfil do hospital' });
-  }
-});
-
-router.get('/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    const [rows] = await db.execute(
-      "SELECT hospital_name, hospital_address, hospital_phone FROM Hospitals WHERE hospital_id = ?",
-      [id]
-    );
-
-    if (rows.length === 0) {
-      return res.status(404).json({ error: `Hospital com ID ${id} não encontrado` });
-    }
-
-    res.status(200).json(rows[0]);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Erro ao obter dados do hospital' });
   }
 });
 
@@ -110,6 +90,5 @@ router.post('/login', async (req, res) => {
     res.status(500).json({ error: 'Erro ao fazer login' });
   }
 });
-
 
 module.exports = router;
