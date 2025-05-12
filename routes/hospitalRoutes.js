@@ -31,8 +31,12 @@ router.post('/login', async (req, res) => {
 
     const hospital = rows[0];
 
-    if (typeof hospital_password !== 'string' || typeof hospital.hospital_password !== 'string') {
-      return res.status(400).json({ error: 'Senha ou dados inválidos' });
+    if (typeof hospital_password !== 'string' || !hospital_password.trim()) {
+      return res.status(400).json({ error: 'Senha inválida' });
+    }
+
+    if (typeof hospital.hospital_password !== 'string' || !hospital.hospital_password.trim()) {
+      return res.status(500).json({ error: 'Erro no banco de dados. Senha do hospital inválida.' });
     }
 
     const match = await bcrypt.compare(hospital_password, hospital.hospital_password);
@@ -57,6 +61,7 @@ router.post('/login', async (req, res) => {
     res.status(500).json({ error: 'Erro no login' });
   }
 });
+
 
 router.post('/', async (req, res) => {
   try {
