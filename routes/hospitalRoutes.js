@@ -13,6 +13,26 @@ router.get('/', async (req, res) => {
   }
 });
 
+router.post('/', async (req, res) => {
+  try {
+    const { hospital_name, hospital_address, hospital_phone } = req.body;
+
+    if (!hospital_name || !hospital_address || !hospital_phone) {
+      return res.status(400).json({ error: 'Todos os campos são obrigatórios' });
+    }
+
+    const [result] = await db.execute(
+      'INSERT INTO Hospitals (hospital_name, hospital_address, hospital_phone) VALUES (?, ?, ?)',
+      [hospital_name, hospital_address, hospital_phone]
+    );
+
+    res.status(201).json({ message: 'Hospital cadastrado', hospital_id: result.insertId });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Erro ao cadastrar hospital' });
+  }
+});
+
 router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
