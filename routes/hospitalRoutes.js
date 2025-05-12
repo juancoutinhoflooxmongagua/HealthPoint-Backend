@@ -39,7 +39,6 @@ router.post('/login', async (req, res) => {
     const token = jwt.sign(
       {
         hospital_id: hospital.hospital_id,
-        hospital_email: hospital.hospital_email
       },
       process.env.JWT_SECRET,
       { expiresIn: '1d' }
@@ -102,18 +101,18 @@ router.get('/profile', verifyToken, async (req, res) => {
     const { hospital_id } = req.user;
 
     const [rows] = await db.execute(
-      "SELECT hospital_name, hospital_id, hospital_address, hospital_phone FROM Hospital WHERE hospital_id = ?",
+      "SELECT hospital_name, hospital_id, hospital_address, hospital_phone FROM Hospitals WHERE hospital_id = ?",
       [hospital_id]
     );
 
     if (rows.length === 0) {
-      return res.status(404).json({ error: 'Hospital Não encontrado' });
+      return res.status(404).json({ error: 'Hospital não encontrado' });
     }
 
     res.status(200).json(rows[0]);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Erro ao obter dados do Hospital' });
+    res.status(500).json({ error: 'Erro ao obter dados do hospital' });
   }
 });
 
