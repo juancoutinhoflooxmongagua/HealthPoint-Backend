@@ -34,26 +34,34 @@ router.post('/', async (req, res) => {
     res.status(500).json({ error: 'Erro ao cadastrar hospital' });
   }
 });
-
 router.get('/profile', verifyToken, async (req, res) => {
   try {
+    console.log('>>> perfil solicitado para ID:', req.hospital);
     const { hospital_id } = req.hospital;
+    if (!hospital_id) {
+      console.error('hospital_id indefinido em req.hospital');
+      return res.status(400).json({ error: 'ID do hospital inválido no token' });
+    }
 
     const [rows] = await db.execute(
-      "SELECT hospital_name, hospital_id, hospital_address, hospital_phone FROM Hospitals WHERE hospital_id = ?",
+      `SELECT 
+         hospital_name, hospital_id, hospital_address, hospital_phone 
+       FROM Hospitals 
+       WHERE hospital_id = ?`,
       [hospital_id]
     );
 
     if (rows.length === 0) {
-      return res.status(404).json({ error: `Hospital com ID ${hospital_id} não encontrado` });
+      return res.status(404).json({ error: 'Hospital não encontrado' });
     }
 
-    res.status(200).json(rows[0]);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Erro ao obter perfil do hospital' });
+    res.json(rows[0]);
+  } catch (err) {
+    console.error('Erro interno em GET /hospital/profile:', err.stack || err);
+    res.status(500).json({ error: 'Erro interno ao obter perfil do hospital' });
   }
 });
+
 
 router.post('/login', async (req, res) => {
   try {
