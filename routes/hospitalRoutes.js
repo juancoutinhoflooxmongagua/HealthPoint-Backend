@@ -73,10 +73,10 @@ router.post('/login', async (req, res) => {
 
 router.get('/profile', verifyToken, async (req, res) => {
   try {
-    const hospital_id = req.hospital_id;
+    const hospital_id = req.user.hospital_id;
 
     if (!hospital_id) {
-      console.error('hospital_id indefinido em req.hospital_id');
+      console.error('hospital_id indefinido em req.user');
       return res.status(400).json({ error: 'ID do hospital inválido no token' });
     }
 
