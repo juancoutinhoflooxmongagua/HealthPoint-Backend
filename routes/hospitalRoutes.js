@@ -3,8 +3,6 @@ const db = require('../config/db');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 
-const { verifyToken } = require('../middlewares/auth');
-
 const router = express.Router();
 
 router.get('/', async (req, res) => {
@@ -75,9 +73,13 @@ router.post('/', async (req, res) => {
   }
 });
 
-router.get('/profile', verifyToken, async (req, res) => {
+router.get('/profile', async (req, res) => {
   try {
-    const { hospital_id } = req.user;
+    const { hospital_id } = req.query;
+
+    if (!hospital_id) {
+      return res.status(400).json({ error: 'ID do hospital não fornecido' });
+    }
 
     const [rows] = await db.execute(
       "SELECT hospital_name, hospital_id, hospital_address, hospital_phone FROM Hospitals WHERE hospital_id = ?",
@@ -91,7 +93,7 @@ router.get('/profile', verifyToken, async (req, res) => {
     res.status(200).json(rows[0]);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Erro ao obter dados do hospital' });
+    res.status(500).json({ error: 'Erro ao obter perfil do hospital' });
   }
 });
 
