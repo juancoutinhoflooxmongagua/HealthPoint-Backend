@@ -23,7 +23,7 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ error: 'Dados incompletos' });
     }
 
-    const [rows] = await db.execute("SELECT * FROM Hospitals WHERE hospital_email = ?", [hospital_email]);
+    const [rows] = await db.execute("SELECT * FROM Hospitals WHERE hospital_id = ?", [hospital_id]);
 
     if (rows.length === 0) {
       return res.status(400).json({ error: 'Hospital não encontrado' });
