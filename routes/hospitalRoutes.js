@@ -15,54 +15,6 @@ router.get('/', async (req, res) => {
   }
 });
 
-router.post('/login', async (req, res) => {
-  try {
-    const { hospital_id, hospital_password } = req.body;
-
-    if (!hospital_id || !hospital_password) {
-      return res.status(400).json({ error: 'Dados incompletos' });
-    }
-
-    const [rows] = await db.execute("SELECT * FROM Hospitals WHERE hospital_id = ?", [hospital_id]);
-
-    if (rows.length === 0) {
-      return res.status(400).json({ error: 'Hospital não encontrado' });
-    }
-
-    const hospital = rows[0];
-
-    if (typeof hospital_password !== 'string' || !hospital_password.trim()) {
-      return res.status(400).json({ error: 'Senha inválida' });
-    }
-
-    if (typeof hospital.hospital_password !== 'string' || !hospital.hospital_password.trim()) {
-      return res.status(500).json({ error: 'Erro no banco de dados. Senha do hospital inválida.' });
-    }
-
-    const match = await bcrypt.compare(hospital_password, hospital.hospital_password);
-
-    if (!match) {
-      return res.status(400).json({ error: 'Senha incorreta' });
-    }
-
-    const token = jwt.sign(
-      { hospital_id: hospital.hospital_id },
-      process.env.JWT_SECRET,
-      { expiresIn: '1d' }
-    );
-
-    res.status(200).json({
-      message: 'Login realizado com sucesso',
-      hospital_id: hospital.hospital_id,
-      token
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Erro no login' });
-  }
-});
-
-
 router.post('/', async (req, res) => {
   try {
     const { hospital_name, hospital_address, hospital_phone } = req.body;
@@ -83,13 +35,9 @@ router.post('/', async (req, res) => {
   }
 });
 
-router.get('/profile', async (req, res) => {
+router.get('/profile/:hospital_id', async (req, res) => {
   try {
-    const { hospital_id } = req.query;
-
-    if (!hospital_id) {
-      return res.status(400).json({ error: 'ID do hospital não fornecido' });
-    }
+    const { hospital_id } = req.params;
 
     const [rows] = await db.execute(
       "SELECT hospital_name, hospital_id, hospital_address, hospital_phone FROM Hospitals WHERE hospital_id = ?",
@@ -97,7 +45,7 @@ router.get('/profile', async (req, res) => {
     );
 
     if (rows.length === 0) {
-      return res.status(404).json({ error: 'Hospital não encontrado' });
+      return res.status(404).json({ error: `Hospital com ID ${hospital_id} não encontrado` });
     }
 
     res.status(200).json(rows[0]);
@@ -117,13 +65,51 @@ router.get('/:id', async (req, res) => {
     );
 
     if (rows.length === 0) {
-      return res.status(404).json({ error: 'Hospital não encontrado' });
+      return res.status(404).json({ error: `Hospital com ID ${id} não encontrado` });
     }
 
     res.status(200).json(rows[0]);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Erro ao obter dados do hospital' });
+  }
+});
+
+router.post('/login', async (req, res) => {
+  try {
+    const { hospital_id, hospital_password } = req.body;
+
+    if (!hospital_id || !hospital_password) {
+      return res.status(400).json({ error: 'ID e senha do hospital são obrigatórios' });
+    }
+
+    const [rows] = await db.execute(
+      "SELECT * FROM Hospitals WHERE hospital_id = ?",
+      [hospital_id]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Hospital não encontrado' });
+    }
+
+    const hospital = rows[0];
+
+    const isPasswordValid = await bcrypt.compare(hospital_password, hospital.hospital_password);
+    
+    if (!isPasswordValid) {
+      return res.status(401).json({ error: 'Senha incorreta' });
+    }
+
+    const token = jwt.sign(
+      { hospital_id: hospital.hospital_id, hospital_name: hospital.hospital_name },
+      'seu-segredo-aqui',
+      { expiresIn: '1h' }
+    );
+
+    res.status(200).json({ message: 'Login bem-sucedido', token });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Erro ao fazer login' });
   }
 });
 
