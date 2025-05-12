@@ -1,5 +1,6 @@
 const express = require('express');
 const db = require('../config/db');
+const { verify } = require('jsonwebtoken');
 
 const router = express.Router();
 
@@ -91,6 +92,27 @@ router.get('/:id', async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Erro ao obter dados do hospital' });
+  }
+});
+
+
+router.get('/profile', verifyToken, async (req, res) => {
+  try {
+    const { hospital_id } = req.user;
+
+    const [rows] = await db.execute(
+      "SELECT hospital_name, hospital_id, hospital_address, hospital_phone FROM Hospital WHERE hospital_id = ?",
+      [hospital_id]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Hospital Não encontrado' });
+    }
+
+    res.status(200).json(rows[0]);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Erro ao obter dados do Hospital' });
   }
 });
 
