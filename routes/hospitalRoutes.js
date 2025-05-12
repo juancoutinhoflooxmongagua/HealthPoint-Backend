@@ -30,6 +30,11 @@ router.post('/login', async (req, res) => {
     }
 
     const hospital = rows[0];
+
+    if (typeof hospital_password !== 'string' || typeof hospital.hospital_password !== 'string') {
+      return res.status(400).json({ error: 'Senha ou dados inválidos' });
+    }
+
     const match = await bcrypt.compare(hospital_password, hospital.hospital_password);
 
     if (!match) {
