@@ -1,6 +1,7 @@
 const express = require('express');
 const db = require('../config/db');
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 const { verifyToken } = require('../middlewares/auth');
 
 const router = express.Router();
@@ -37,9 +38,7 @@ router.post('/login', async (req, res) => {
     }
 
     const token = jwt.sign(
-      {
-        hospital_id: hospital.hospital_id,
-      },
+      { hospital_id: hospital.hospital_id },
       process.env.JWT_SECRET,
       { expiresIn: '1d' }
     );
@@ -75,13 +74,13 @@ router.post('/', async (req, res) => {
   }
 });
 
-router.get('/:id', async (req, res) => {
+router.get('/profile', verifyToken, async (req, res) => {
   try {
-    const { id } = req.params;
+    const { hospital_id } = req.user;
 
     const [rows] = await db.execute(
-      "SELECT hospital_name, hospital_address, hospital_phone FROM Hospitals WHERE hospital_id = ?",
-      [id]
+      "SELECT hospital_name, hospital_id, hospital_address, hospital_phone FROM Hospitals WHERE hospital_id = ?",
+      [hospital_id]
     );
 
     if (rows.length === 0) {
@@ -95,14 +94,13 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-
-router.get('/profile', verifyToken, async (req, res) => {
+router.get('/:id', async (req, res) => {
   try {
-    const { hospital_id } = req.user;
+    const { id } = req.params;
 
     const [rows] = await db.execute(
-      "SELECT hospital_name, hospital_id, hospital_address, hospital_phone FROM Hospitals WHERE hospital_id = ?",
-      [hospital_id]
+      "SELECT hospital_name, hospital_address, hospital_phone FROM Hospitals WHERE hospital_id = ?",
+      [id]
     );
 
     if (rows.length === 0) {
