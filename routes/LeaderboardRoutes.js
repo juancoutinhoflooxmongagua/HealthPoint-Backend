@@ -10,10 +10,9 @@ router.get('/', verifyToken, isAdmin, async (req, res) => {
       SELECT 
         u.user_id,
         u.user_name,
-        SUM(a.points_awarded) AS total_points
-      FROM applications a
-      JOIN Users u ON a.volunteer_id = u.user_id
-      WHERE a.application_status = 'approved'
+        COALESCE(SUM(a.points_awarded), 0) AS total_points
+      FROM Users u
+      LEFT JOIN applications a ON a.volunteer_id = u.user_id
       GROUP BY u.user_id
       ORDER BY total_points DESC
     `);
