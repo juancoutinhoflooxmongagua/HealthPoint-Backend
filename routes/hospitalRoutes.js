@@ -15,6 +15,34 @@ router.get('/', async (req, res) => {
   }
 });
 
+router.get('/jobs-with-applications', verifyToken, async (req, res) => {
+  try {
+    const hospital_id = req.user.hospital_id;
+
+    const [jobs] = await db.execute(
+      `SELECT * FROM jobs WHERE hospital_id = ?`,
+      [hospital_id]
+    );
+
+    for (const job of jobs) {
+      const [applications] = await db.execute(
+        `SELECT a.application_id, a.professional_id, p.name, p.email
+         FROM applications a
+         JOIN professionals p ON a.professional_id = p.professional_id
+         WHERE a.job_id = ?`,
+        [job.job_id]
+      );
+      job.applications = applications;
+    }
+
+    res.json(jobs);
+  } catch (err) {
+    console.error('Erro ao buscar vagas com candidaturas:', err);
+    res.status(500).json({ error: 'Erro ao buscar vagas e candidatos' });
+  }
+});
+
+
 router.post('/', async (req, res) => {
   try {
     const { hospital_name, hospital_address, hospital_phone, hospital_password } = req.body;
