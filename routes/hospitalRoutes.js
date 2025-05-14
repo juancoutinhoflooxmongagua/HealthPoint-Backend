@@ -46,9 +46,15 @@ router.get('/jobs-with-applications', verifyToken, async (req, res) => {
 
 router.put('/:id/status', verifyToken, async (req, res) => {
   const applicationId = req.params.id;
-  const { status } = req.body;
+  let { status } = req.body;
 
-  if (!["aceita", "rejeitada"].includes(status)) {
+  if (status === 'aceita') {
+    status = 'approved';
+  } else if (status === 'rejeitada') {
+    status = 'rejected';
+  }
+
+  if (!["approved", "rejected"].includes(status)) {
     return res.status(400).json({ error: 'Status inválido' });
   }
 
