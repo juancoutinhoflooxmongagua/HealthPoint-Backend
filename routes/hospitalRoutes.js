@@ -26,9 +26,11 @@ router.get('/jobs-with-applications', verifyToken, async (req, res) => {
 
     for (const job of jobs) {
       const [applications] = await db.execute(
-        `SELECT a.application_id, a.professional_id, p.name, p.email
+        `SELECT 
+           a.application_id, a.volunteer_id, a.application_status, a.points_awarded, a.applied_at,
+           u.user_name, u.user_email
          FROM applications a
-         JOIN professionals p ON a.professional_id = p.professional_id
+         JOIN Users u ON a.volunteer_id = u.user_id
          WHERE a.job_id = ?`,
         [job.job_id]
       );
