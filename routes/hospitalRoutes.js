@@ -44,7 +44,7 @@ router.get('/jobs-with-applications', verifyToken, async (req, res) => {
   }
 });
 
-router.put('/applications/:id/status', verifyToken, async (req, res) => {
+router.put('/:id/status', verifyToken, async (req, res) => {
   const applicationId = req.params.id;
   const { status } = req.body;
 
@@ -53,17 +53,21 @@ router.put('/applications/:id/status', verifyToken, async (req, res) => {
   }
 
   try {
-    await db.execute(
+    const [result] = await db.execute(
       `UPDATE applications SET application_status = ? WHERE application_id = ?`,
       [status, applicationId]
     );
-    res.json({ message: 'Status atualizado' });
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Candidatura não encontrada' });
+    }
+
+    res.json({ message: 'Status atualizado com sucesso' });
   } catch (err) {
-    console.error(err);
+    console.error('Erro ao atualizar status da candidatura:', err);
     res.status(500).json({ error: 'Erro ao atualizar status da candidatura' });
   }
 });
-
 
 router.post('/', async (req, res) => {
   try {
