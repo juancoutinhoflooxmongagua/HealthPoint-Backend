@@ -44,6 +44,27 @@ router.get('/jobs-with-applications', verifyToken, async (req, res) => {
   }
 });
 
+router.put('/applications/:id/status', verifyToken, async (req, res) => {
+  const applicationId = req.params.id;
+  const { status } = req.body;
+
+  if (!["aceita", "rejeitada"].includes(status)) {
+    return res.status(400).json({ error: 'Status inválido' });
+  }
+
+  try {
+    await db.execute(
+      `UPDATE applications SET application_status = ? WHERE application_id = ?`,
+      [status, applicationId]
+    );
+    res.json({ message: 'Status atualizado' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Erro ao atualizar status da candidatura' });
+  }
+});
+
+
 router.post('/', async (req, res) => {
   try {
     const { hospital_name, hospital_address, hospital_phone, hospital_password } = req.body;
