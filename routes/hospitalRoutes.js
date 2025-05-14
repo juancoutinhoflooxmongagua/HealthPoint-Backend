@@ -28,7 +28,7 @@ router.get('/jobs-with-applications', verifyToken, async (req, res) => {
       const [applications] = await db.execute(
         `SELECT 
            a.application_id, a.volunteer_id, a.application_status, a.points_awarded, a.applied_at,
-           u.user_name, u.user_email
+           u.user_name AS user_name, u.user_email AS user_email
          FROM applications a
          JOIN Users u ON a.volunteer_id = u.user_id
          WHERE a.job_id = ?`,
@@ -43,7 +43,6 @@ router.get('/jobs-with-applications', verifyToken, async (req, res) => {
     res.status(500).json({ error: 'Erro ao buscar vagas e candidatos' });
   }
 });
-
 
 router.post('/', async (req, res) => {
   try {
