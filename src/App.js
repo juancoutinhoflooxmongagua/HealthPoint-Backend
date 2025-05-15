@@ -13,6 +13,7 @@ const jobRoutes = require('../routes/jobRouter');
 const hospitalRoutes = require('../routes/hospitalRoutes');
 const LeaderboardRoutes = require('../routes/LeaderboardRoutes')
 const StaticsRoutes = require('../routes/StatisticsRoutes')
+const PatientsRoutes = require('../routes/patientRoutes')
 
 app.use('/', userRoutes);
 app.use('/jobs', jobRoutes);
@@ -20,5 +21,6 @@ app.use('/auth', authRoutes);
 app.use('/hospital', hospitalRoutes);
 app.use('/stats', StaticsRoutes)
 app.use('/leaderboard', LeaderboardRoutes)
+app.use('/PatientsRoutes', PatientsRoutes)
 
 module.exports = app;
