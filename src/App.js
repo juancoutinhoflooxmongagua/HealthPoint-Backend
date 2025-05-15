@@ -21,6 +21,6 @@ app.use('/auth', authRoutes);
 app.use('/hospital', hospitalRoutes);
 app.use('/stats', StaticsRoutes)
 app.use('/leaderboard', LeaderboardRoutes)
-app.use('/PatientsRoutes', PatientsRoutes)
+app.use('/patients', PatientsRoutes)
 
 module.exports = app;
