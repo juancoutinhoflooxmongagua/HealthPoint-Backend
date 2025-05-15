@@ -68,6 +68,28 @@ router.put('/:id/status', verifyToken, async (req, res) => {
       return res.status(404).json({ error: 'Candidatura não encontrada' });
     }
 
+    if (status === 'approved') {
+      const [rows] = await db.execute(
+        `SELECT a.volunteer_id, u.user_name 
+         FROM applications a
+         JOIN Users u ON a.volunteer_id = u.user_id
+         WHERE a.application_id = ?`,
+        [applicationId]
+      );
+
+      if (rows.length > 0) {
+        const { volunteer_id, user_name } = rows[0];
+
+        const title = 'Candidatura aprovada';
+        const message = `Parabéns, ${user_name}! Sua candidatura foi aprovada.`;
+
+        await db.execute(
+          `INSERT INTO notifications_users (user_id, title, message) VALUES (?, ?, ?)`,
+          [volunteer_id, title, message]
+        );
+      }
+    }
+
     res.json({ message: 'Status atualizado com sucesso' });
   } catch (err) {
     console.error('Erro ao atualizar status da candidatura:', err);
