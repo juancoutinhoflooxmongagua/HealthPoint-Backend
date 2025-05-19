@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../config/db'); 
+const db = require('../config/db');
 
-router.post('/notifications/users', async (req, res) => {
+router.post('/users', async (req, res) => {
   const { user_id, title, message } = req.body;
   try {
     await db.query(
@@ -15,7 +15,7 @@ router.post('/notifications/users', async (req, res) => {
   }
 });
 
-router.get('/notifications/users/:userId', async (req, res) => {
+router.get('/users/:userId', async (req, res) => {
   const userId = req.params.userId;
   try {
     const [notifications] = await db.query(
@@ -28,7 +28,7 @@ router.get('/notifications/users/:userId', async (req, res) => {
   }
 });
 
-router.patch('/notifications/users/:id/read', async (req, res) => {
+router.patch('/users/:id/read', async (req, res) => {
   const id = req.params.id;
   try {
     await db.query(
@@ -41,7 +41,7 @@ router.patch('/notifications/users/:id/read', async (req, res) => {
   }
 });
 
-router.post('/notifications/hospitals', async (req, res) => {
+router.post('/hospitals', async (req, res) => {
   const { hospital_id, title, message } = req.body;
   try {
     await db.query(
@@ -54,7 +54,7 @@ router.post('/notifications/hospitals', async (req, res) => {
   }
 });
 
-router.get('/notifications/hospitals/:hospitalId', async (req, res) => {
+router.get('/hospitals/:hospitalId', async (req, res) => {
   const hospitalId = req.params.hospitalId;
   try {
     const [notifications] = await db.query(
@@ -67,7 +67,7 @@ router.get('/notifications/hospitals/:hospitalId', async (req, res) => {
   }
 });
 
-router.patch('/notifications/hospitals/:id/read', async (req, res) => {
+router.patch('/hospitals/:id/read', async (req, res) => {
   const id = req.params.id;
   try {
     await db.query(
