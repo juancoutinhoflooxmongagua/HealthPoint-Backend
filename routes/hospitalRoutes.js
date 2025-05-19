@@ -60,7 +60,7 @@ router.put('/:id/status', verifyToken, async (req, res) => {
 
   try {
     const [result] = await db.execute(
-      `UPDATE applications SET application_status = ? WHERE application_id = ?`,
+q      `UPDATE applications SET application_status = ? WHERE application_id = ?`,
       [status, applicationId]
     );
 
