@@ -80,4 +80,31 @@ router.patch('/hospitals/:id/read', async (req, res) => {
   }
 });
 
+router.get('/users/:userId/unread/count', async (req, res) => {
+  const userId = req.params.userId;
+  try {
+    const [[{ count }]] = await db.query(
+      'SELECT COUNT(*) as count FROM notifications_users WHERE user_id = ? AND is_read = FALSE',
+      [userId]
+    );
+    res.json({ unreadCount: count });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.get('/hospitals/:hospitalId/unread/count', async (req, res) => {
+  const hospitalId = req.params.hospitalId;
+  try {
+    const [[{ count }]] = await db.query(
+      'SELECT COUNT(*) as count FROM notifications_hospitals WHERE hospital_id = ? AND is_read = FALSE',
+      [hospitalId]
+    );
+    res.json({ unreadCount: count });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+
 module.exports = router;
