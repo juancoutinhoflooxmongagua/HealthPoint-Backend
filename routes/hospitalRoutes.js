@@ -177,4 +177,51 @@ router.get('/profile', verifyToken, async (req, res) => {
   }
 });
 
+router.put('/jobs/application/:applicationId/finish', verifyToken, async (req, res) => {
+  const { applicationId } = req.params;
+
+  try {
+    const [applications] = await db.execute(
+      `SELECT * FROM applications WHERE application_id = ?`,
+      [applicationId]
+    );
+
+    if (applications.length === 0) {
+      return res.status(404).json({ error: 'Candidatura não encontrada' });
+    }
+
+    const [result] = await db.execute(
+      `UPDATE applications SET application_status = 'finished', points_awarded = 10 WHERE application_id = ?`,
+      [applicationId]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(500).json({ error: 'Erro ao finalizar trabalho' });
+    }
+
+    const volunteer_id = applications[0].volunteer_id;
+    const [userRows] = await db.execute(
+      `SELECT user_name FROM Users WHERE user_id = ?`,
+      [volunteer_id]
+    );
+
+    if (userRows.length > 0) {
+      const user_name = userRows[0].user_name;
+
+      const title = 'Trabalho finalizado';
+      const message = `Olá, ${user_name}! Seu trabalho foi finalizado e você recebeu 10 pontos.`;
+
+      await db.execute(
+        `INSERT INTO notifications_users (user_id, title, message) VALUES (?, ?, ?)`,
+        [volunteer_id, title, message]
+      );
+    }
+
+    res.json({ message: 'Trabalho finalizado com sucesso' });
+  } catch (err) {
+    console.error('Erro ao finalizar trabalho:', err);
+    res.status(500).json({ error: 'Erro ao finalizar trabalho' });
+  }
+});
+
 module.exports = router;
