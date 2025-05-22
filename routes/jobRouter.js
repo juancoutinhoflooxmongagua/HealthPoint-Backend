@@ -3,10 +3,10 @@ const { verifyToken } = require('../middlewares/auth');
 const router = express.Router();
 const JobController = require('../controller/JobController');
 
-router.post('/create', verifyToken, JobController.create); 
-router.get('/', JobController.list); 
-router.delete('/:id', verifyToken, JobController.remove); 
-router.put('/:id', verifyToken, JobController.update); 
-router.put('/applications/:applicationId/finish', jobController.finishApplication);
+router.post('/create', verifyToken, JobController.create);
+router.get('/', JobController.list);
+router.delete('/:id', verifyToken, JobController.remove);
+router.put('/:id', verifyToken, JobController.update);
+router.put('/applications/:applicationId/finish', verifyToken, JobController.finishApplication);
 
 module.exports = router;
