@@ -3,38 +3,18 @@ const jobModel = require('../model/Job');
 module.exports = {
   async create(req, res) {
     try {
-      console.log('[CREATE JOB] Dados recebidos:', req.body);
-
       const job = await jobModel.create(req.body);
-
-      console.log('[CREATE JOB] Vaga criada com sucesso:', job);
       res.status(201).json(job);
     } catch (err) {
-      console.error('[CREATE JOB] Erro ao criar vaga:', {
-        mensagem: err.message,
-        stack: err.stack,
-        dadosRecebidos: req.body
-      });
-      res.status(500).json({
-        error: 'Erro ao criar vaga',
-        details: err.message
-      });
+      res.status(500).json({ error: 'Erro ao criar vaga', details: err.message });
     }
   },
 
   async list(req, res) {
     try {
-      console.log('[LIST JOBS] Iniciando listagem de vagas...');
-
       const jobs = await jobModel.list();
-
-      console.log(`[LIST JOBS] ${jobs.length} vagas encontradas`);
       res.json(jobs);
     } catch (err) {
-      console.error('[LIST JOBS] Erro ao listar vagas:', {
-        mensagem: err.message,
-        stack: err.stack
-      });
       res.status(500).json({ error: 'Erro ao listar vagas' });
     }
   },
@@ -42,18 +22,9 @@ module.exports = {
   async remove(req, res) {
     try {
       const { id } = req.params;
-      console.log(`[REMOVE JOB] Tentando remover vaga com ID: ${id}`);
-
       await jobModel.remove(id);
-
-      console.log('[REMOVE JOB] Vaga removida com sucesso');
       res.sendStatus(204);
     } catch (err) {
-      console.error('[REMOVE JOB] Erro ao remover vaga:', {
-        mensagem: err.message,
-        stack: err.stack,
-        id: req.params.id
-      });
       res.status(500).json({ error: 'Erro ao remover vaga' });
     }
   },
@@ -62,52 +33,29 @@ module.exports = {
     try {
       const { id } = req.params;
       const updateData = req.body;
-
-      console.log(`[UPDATE JOB] Tentando atualizar vaga com ID: ${id}`);
-      console.log('[UPDATE JOB] Dados recebidos para atualização:', updateData);
-
       await jobModel.update(id, updateData);
-
-      console.log('[UPDATE JOB] Vaga atualizada com sucesso');
       res.sendStatus(204);
     } catch (err) {
-      console.error('[UPDATE JOB] Erro ao atualizar vaga:', {
-        mensagem: err.message,
-        stack: err.stack,
-        id: req.params.id,
-        dadosRecebidos: req.body
-      });
       res.status(500).json({ error: 'Erro ao atualizar vaga' });
     }
   },
 
-  async finish(req, res) {
+  async finishApplication(req, res) {
     try {
-      const { id } = req.params;
-
-      console.log(`[FINISH JOB] Tentando finalizar vaga com ID: ${id}`);
-
-      const result = await jobModel.finish(id);
-
-      console.log('[FINISH JOB] Vaga finalizada com sucesso:', result);
-
+      const { applicationId } = req.params;
+      const result = await jobModel.finishApplication(applicationId);
       res.status(200).json(result);
     } catch (err) {
-      if (err.message === 'Job not found') {
-        console.error('[FINISH JOB] Vaga não encontrada:', {
-          mensagem: err.message,
-          stack: err.stack,
-          id: req.params.id
-        });
-
-        return res.status(404).json({ error: 'Vaga não encontrada' });
+      if (err.message === 'Candidatura não encontrada') {
+        return res.status(404).json({ error: 'Candidatura não encontrada' });
       }
-      console.error('[FINISH JOB] Erro ao finalizar vaga:', {
-        mensagem: err.message,
-        stack: err.stack,
-        id: req.params.id
-      });
-      res.status(500).json({ error: 'Erro ao finalizar vaga' });
+      if (err.message === 'Trabalho já finalizado') {
+        return res.status(400).json({ error: 'Trabalho já foi finalizado' });
+      }
+      if (err.message === 'Apenas candidaturas aprovadas podem ser finalizadas') {
+        return res.status(400).json({ error: 'Candidatura precisa estar aprovada para ser finalizada' });
+      }
+      res.status(500).json({ error: 'Erro ao finalizar trabalho' });
     }
   }
 };
