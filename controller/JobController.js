@@ -79,5 +79,35 @@ module.exports = {
       });
       res.status(500).json({ error: 'Erro ao atualizar vaga' });
     }
+  },
+
+  async finish(req, res) {
+    try {
+      const { id } = req.params;
+
+      console.log(`[FINISH JOB] Tentando finalizar vaga com ID: ${id}`);
+
+      const result = await jobModel.finish(id);
+
+      console.log('[FINISH JOB] Vaga finalizada com sucesso:', result);
+
+      res.status(200).json(result);
+    } catch (err) {
+      if (err.message === 'Job not found') {
+        console.error('[FINISH JOB] Vaga não encontrada:', {
+          mensagem: err.message,
+          stack: err.stack,
+          id: req.params.id
+        });
+
+        return res.status(404).json({ error: 'Vaga não encontrada' });
+      }
+      console.error('[FINISH JOB] Erro ao finalizar vaga:', {
+        mensagem: err.message,
+        stack: err.stack,
+        id: req.params.id
+      });
+      res.status(500).json({ error: 'Erro ao finalizar vaga' });
+    }
   }
 };

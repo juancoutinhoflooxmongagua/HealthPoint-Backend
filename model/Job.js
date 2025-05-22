@@ -1,11 +1,11 @@
-const pool = require('../config/db'); 
+const pool = require('../config/db');
 
 module.exports = {
-  
-    async create(data) {
+  // Criar um job
+  async create(data) {
     const { creator_id, hospital_name, hospital_id, job_type, job_title, job_description, job_points } = data;
 
-    console.log('Dados recebidos para criação:', data); 
+    console.log('Dados recebidos para criação:', data);
     try {
       const [result] = await pool.execute(
         `INSERT INTO jobs 
@@ -15,11 +15,10 @@ module.exports = {
       );
       return { job_id: result.insertId, ...data };
     } catch (err) {
-      console.error('Erro no INSERT do job:', err); 
-      throw err; 
+      console.error('Erro no INSERT do job:', err);
+      throw err;
     }
   },
-
 
   // Listar todos os jobs
   async list() {
@@ -58,6 +57,41 @@ module.exports = {
       );
     } catch (err) {
       throw new Error('Erro ao atualizar vaga');
+    }
+  },
+
+  // Finalizar um job
+  async finish(id) {
+    try {
+      const [result] = await pool.execute(
+        'SELECT job_points FROM jobs WHERE job_id = ?',
+        [id]
+      );
+
+      if (result.length === 0) {
+        throw new Error('Job não encontrado');
+      }
+
+      const jobPoints = result[0].job_points;
+
+      await pool.execute(
+        'UPDATE jobs SET job_status = "finished" WHERE job_id = ?',
+        [id]
+      );
+
+      await pool.execute(
+        `UPDATE applications 
+         SET application_status = 'completed', 
+             points_awarded = ?, 
+             decision_at = NOW() 
+         WHERE job_id = ? AND application_status = 'approved'`,
+        [jobPoints, id]
+      );
+
+      return { message: 'Job finalizado com sucesso', jobPoints };
+    } catch (err) {
+      console.error('Erro ao finalizar job:', err);
+      throw err;
     }
   }
 };
