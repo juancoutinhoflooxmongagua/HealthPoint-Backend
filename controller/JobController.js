@@ -1,4 +1,5 @@
 const jobModel = require('../model/Job');
+const pool = require('../config/db');
 
 module.exports = {
   async create(req, res) {
@@ -16,6 +17,42 @@ module.exports = {
       res.json(jobs);
     } catch (err) {
       res.status(500).json({ error: 'Erro ao listar vagas' });
+    }
+  },
+
+  async listWithApplications(req, res) {
+    try {
+      const hospitalId = req.user.hospital_id;
+      if (!hospitalId) {
+        return res.status(401).json({ error: 'Hospital não autenticado' });
+      }
+
+      const [jobs] = await pool.execute(
+        'SELECT * FROM jobs WHERE hospital_id = ?',
+        [hospitalId]
+      );
+
+      const jobsWithApplications = await Promise.all(
+        jobs.map(async (job) => {
+          const [applications] = await pool.execute(
+            `SELECT a.*, u.name AS user_name, u.email AS user_email
+             FROM applications a
+             JOIN users u ON a.user_id = u.id
+             WHERE a.job_id = ?`,
+            [job.job_id]
+          );
+
+          return {
+            ...job,
+            applications
+          };
+        })
+      );
+
+      res.json(jobsWithApplications);
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Erro ao buscar vagas com aplicações' });
     }
   },
 
